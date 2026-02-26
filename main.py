@@ -10,6 +10,9 @@ from etl.loads.load_facts import load_fact_inscritos
 from etl.control import register_year
 from etl.loads.load_dim_tiempo import load_dim_tiempo
 from etl.loads.load_dim_sexo import load_dim_sexos
+from etl.loads.load_dim_institucion import load_dim_institucion
+from etl.loads.load_dim_municipios import load_dim_municipios
+from etl.loads.load_dim_departamentos import load_dim_departamentos
 # def run_snies(path, anio):
 
 #     if check_year_loaded(engine, "fact_inscritos", anio):
@@ -50,6 +53,25 @@ def load_dim_sexo(path):
     df = extract_excel(path)
     load_dim_sexos(engine,df)
 
+#Carga de dimension instituciones
+#Carga de dimension sexo
+def load_dim_instituciones(path):
+    df = extract_excel(path)
+    load_dim_institucion(engine,df)
+
+#Carga de departamentos
+
+def load_dim_departametoss(path):
+    df = extract_excel(path)
+    load_dim_departamentos(engine,df)
+
+# Carga de municipios 
+def load_dim_municipioss(path):
+    df = extract_excel(path)
+    load_dim_municipios(engine,df)
+
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--file", required=True)
@@ -61,6 +83,9 @@ if __name__ == "__main__":
     #run_inscritos(args.file, args.year)
     
     #load_dim_tiempos(args.file)
-    load_dim_sexo(args.file)
+   # load_dim_sexo(args.file)
+    load_dim_instituciones(args.file)
+   # load_dim_municipioss(args.file)
+   # load_dim_departametoss(args.file)
 
 
