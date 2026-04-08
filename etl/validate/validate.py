@@ -1,6 +1,6 @@
 def validate_inscritos(df):
 
-    print("\n===== VALIDACIÓN INSCRITOS =====")
+    print("\n===== VALIDACIÓN SNIES =====")
 
     print("Registros totales:", len(df))
 
@@ -13,20 +13,29 @@ def validate_inscritos(df):
     print("\nInstituciones encontradas:")
     print(df["codigo_de_la_institucion"].unique())
 
-    print("\nValores únicos sexo:")
-    print(df["sexo"].unique())
+    print("\nValores únicos género:")
+    print(df["id_genero"].unique())
 
-    print("\nTotal inscritos:", df["inscritos"].sum())
+    print("\nTipos encontrados:")
+    print(df["tipo"].unique())
 
-    # Duplicados por grano
+    # 🔥 TOTAL GENERAL
+    print("\nTotal valor:", df["valor"].sum())
+
+    # 🔥 TOTAL POR TIPO (CLAVE)
+    print("\nTotales por tipo:")
+    print(df.groupby("tipo")["valor"].sum())
+
+    # 🔍 Duplicados
     duplicates = df.duplicated(
         subset=[
             "codigo_de_la_institucion",
             "codigo_snies_del_programa",
             "codigo_del_municipio_programa",
-            "sexo",
+            "id_genero",
             "anio",
-            "semestre"
+            "semestre",
+            "tipo"
         ]
     )
 

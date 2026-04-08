@@ -1,27 +1,44 @@
 import unicodedata
-#Normalizar columnas
+
+# 🔹 Normalizar nombres de columnas
 def normalize_column_name(col):
+    col = col.replace("\n", " ")
     col = col.strip().lower()
     col = unicodedata.normalize("NFKD", col)
     col = col.encode("ascii", "ignore").decode("utf-8")
     col = col.replace(" ", "_")
+    col = col.replace("(", "").replace(")", "")
     return col
 
-#Normalizacion de sexos
+
+# 🔹 Limpieza general SNIES
 def clean_snies(df):
     df.columns = [normalize_column_name(c) for c in df.columns]
-
-    if "sexo" in df.columns:
-        df["sexo"] = df["sexo"].astype(str).str.upper().str.strip()
-        df["sexo"] = df["sexo"].fillna("NO REPORTADO")
-
     return df
 
-# Filtrado por instituciones
-def filter_instituciones(df, codigos=["1120", "1123"]):
 
-    if "codigo_de_la_institucion" not in df.columns:
-        raise ValueError("No se encontró la columna codigo_de_la_institucion")
+# 🔹 Detectar columna dinámica (valor)
+def detectar_columna_valor(df):
+
+    for col in df.columns:
+        col_lower = col.lower()
+        col_clean = col_lower.replace("_", "").replace(" ", "")
+
+        if "inscrit" in col_clean:
+            return col, "inscritos"
+
+        elif "admit" in col_clean:
+            return col, "admitidos"
+
+        elif "matricul" in col_clean:
+            return col, "matriculados"
+
+    print("⚠️ Columnas disponibles:", df.columns.tolist())
+    raise ValueError("No se encontró columna de valor")
+
+
+# 🔹 Filtrar instituciones
+def filter_instituciones(df, codigos=["1120", "1123"]):
 
     df["codigo_de_la_institucion"] = (
         df["codigo_de_la_institucion"]
@@ -29,75 +46,137 @@ def filter_instituciones(df, codigos=["1120", "1123"]):
         .str.strip()
     )
 
-    df_filtrado = df[
-        df["codigo_de_la_institucion"].isin(codigos)
-    ]
+    df = df[df["codigo_de_la_institucion"].isin(codigos)]
 
-    print("Instituciones encontradas:", df_filtrado["codigo_de_la_institucion"].unique())
-    print("Registros después del filtro:", len(df_filtrado))
-
-    return df_filtrado
-
-# Normalizar matriculados 
-
-def clean_matriculados(df):
-
-    df = clean_snies(df)
-
-    required_cols = [
-        "codigo_de_la_institucion",
-        "codigo_snies_del_programa",
-        "codigo_del_municipio_programa",
-        "sexo",
-        "ano",
-        "semestre",
-        "matriculados"
-    ]
-
-    missing = [c for c in required_cols if c not in df.columns]
-    if missing:
-        raise ValueError(f"Faltan columnas requeridas: {missing}")
-
-    # Tipos correctos
-    df["codigo_de_la_institucion"] = df["codigo_de_la_institucion"].astype(str).str.strip()
-    df["codigo_snies_del_programa"] = df["codigo_snies_del_programa"].astype(str).str.strip()
-    df["codigo_del_municipio_programa"] = df["codigo_del_municipio_programa"].astype(str).str.strip()
-
-    df["sexo"] = df["sexo"].astype(str).str.upper().str.strip()
-    df["ano"] = df["ano"].astype(int)
-    df["semestre"] = df["semestre"].astype(int)
-    df["matriculados"] = df["matriculados"].fillna(0).astype(int)
+    print("🏫 Instituciones:", df["codigo_de_la_institucion"].unique())
+    print("📊 Registros:", len(df))
 
     return df
 
 
-#Limpiar inscritos 
-def clean_inscritos(df):
+# 🔹 Mapear columnas dinámicamente
+def mapear_columnas(df):
 
+    columnas = {}
+
+    for col in df.columns:
+        c = col.lower().replace("\n", " ").strip()
+
+        # institución
+        if "institucion" in c and "codigo" in c:
+            columnas["codigo_de_la_institucion"] = col
+
+        # programa snies
+        elif "snies" in c and "programa" in c:
+            columnas["codigo_snies_del_programa"] = col
+
+        # municipio programa
+        elif "municipio" in c and "programa" in c:
+            columnas["codigo_del_municipio_programa"] = col
+
+        # 🔥 ID GENERO (modelo estrella)
+        elif "id genero" in c or "id_genero" in c:
+            columnas["id_genero"] = col
+
+        # fallback por si no viene ID
+        elif "genero" in c and "id" not in c:
+            columnas["genero"] = col
+
+        # año
+        elif "ano" in c or "año" in c:
+            columnas["anio"] = col
+
+        # semestre
+        elif "semestre" in c:
+            columnas["semestre"] = col
+
+    return columnas
+
+
+# 🔥 TRANSFORMADOR FINAL
+def transformar_snies(df):
+
+    # 1. limpiar columnas
     df = clean_snies(df)
 
-    required_cols = [
+    # 2. detectar valor
+    col_valor, tipo = detectar_columna_valor(df)
+    df = df.rename(columns={col_valor: "valor"})
+    df["tipo"] = tipo
+
+    # 3. mapear columnas
+    mapeo = mapear_columnas(df)
+
+    required = [
         "codigo_de_la_institucion",
         "codigo_snies_del_programa",
         "codigo_del_municipio_programa",
-        "sexo",
         "anio",
-        "semestre",
-        "inscritos"
+        "semestre"
     ]
 
-    missing = [c for c in required_cols if c not in df.columns]
-    if missing:
-        raise ValueError(f"Faltan columnas requeridas: {missing}")
+    # 🔥 si tienes dimensión sexo → usar id_genero
+    if "id_genero" in mapeo:
+        required.append("id_genero")
+    else:
+        required.append("genero")
 
-    # Normalización tipos
+    missing = [c for c in required if c not in mapeo]
+
+    if missing:
+        print("⚠️ Columnas disponibles:", df.columns.tolist())
+        print("🔍 Mapeo detectado:", mapeo)
+        raise ValueError(f"❌ Faltan columnas: {missing}")
+
+    # 4. renombrar columnas
+    rename_dict = {
+        mapeo["codigo_de_la_institucion"]: "codigo_de_la_institucion",
+        mapeo["codigo_snies_del_programa"]: "codigo_snies_del_programa",
+        mapeo["codigo_del_municipio_programa"]: "codigo_del_municipio_programa",
+        mapeo["anio"]: "anio",
+        mapeo["semestre"]: "semestre"
+    }
+
+    if "id_genero" in mapeo:
+        rename_dict[mapeo["id_genero"]] = "id_genero"
+    else:
+        rename_dict[mapeo["genero"]] = "genero"
+
+    df = df.rename(columns=rename_dict)
+
+    # 5. tipos de datos
     df["codigo_de_la_institucion"] = df["codigo_de_la_institucion"].astype(str).str.strip()
     df["codigo_snies_del_programa"] = df["codigo_snies_del_programa"].astype(str).str.strip()
     df["codigo_del_municipio_programa"] = df["codigo_del_municipio_programa"].astype(str).str.strip()
 
-    df["sexo"] = df["sexo"].astype(str).str.upper().str.strip()
-    df["anio"] = df["anio"].astype(str)
-    df["semestre"] = df["semestre"].astype(str)
-    df["inscritos"] = df["inscritos"].fillna(0).astype(str)
+    df["anio"] = df["anio"].astype(int)
+    df["semestre"] = df["semestre"].astype(int)
+    df["valor"] = df["valor"].fillna(0).astype(int)
+
+    if "id_genero" in df.columns:
+        df["id_genero"] = df["id_genero"].astype(int)
+    else:
+        df["genero"] = df["genero"].astype(str).str.upper().str.strip()
+
+    # 6. filtrar instituciones
+    df = filter_instituciones(df)
+
+    # 7. columnas finales
+    columnas_finales = [
+        "codigo_de_la_institucion",
+        "codigo_snies_del_programa",
+        "codigo_del_municipio_programa",
+        "anio",
+        "semestre",
+        "tipo",
+        "valor"
+    ]
+
+    if "id_genero" in df.columns:
+        columnas_finales.append("id_genero")
+    else:
+        columnas_finales.append("genero")
+
+    df = df[columnas_finales]
 
     return df

@@ -1,91 +1,58 @@
-import argparse
+import os
 from config.database import engine
 from etl.extract import extract_excel
-from etl.transform import clean_snies
-from etl.control import check_year_loaded
-from etl.transform import filter_instituciones
+from etl.loads.load_dim_programa_oferta import load_dim_programa_oferta
+from etl.transform import transformar_snies
 from etl.validate.validate import validate_inscritos
-from etl.transform import clean_inscritos, filter_instituciones
 from etl.loads.load_facts import load_fact_inscritos
-from etl.control import register_year
-from etl.loads.load_dim_tiempo import load_dim_tiempo
-from etl.loads.load_dim_sexo import load_dim_sexos
-from etl.loads.load_dim_institucion import load_dim_institucion
-from etl.loads.load_dim_municipios import load_dim_municipios
-from etl.loads.load_dim_departamentos import load_dim_departamentos
-# def run_snies(path, anio):
-
-#     if check_year_loaded(engine, "fact_inscritos", anio):
-#         print(f"El año {anio} ya fue cargado.")
-#         return
-
-#     df = extract_excel(path)
-#     df = clean_inscritos(df)
-#     df = filter_instituciones(df, codigos=["1120", "1123"])
-#     validate_inscritos(df)
-#     print("Transformación completada.")
-#     print(f"Filas procesadas: {len(df)}")
+from etl.control import check_year_loaded, register_year
 
 
+def detectar_tipo_archivo(nombre):
+    nombre = nombre.lower()
+    if "inscritos" in nombre:
+        return "inscritos"
+    elif "admitidos" in nombre:
+        return "admitidos"
+    elif "matriculados" in nombre:
+        return "matriculados"
+    return "otro"
 
-# def run_inscritos(path, anio):
 
-#     df = extract_excel(path)
-#     df = clean_inscritos(df)
-#     df = filter_instituciones(df, ["1120", "1123"])
+def procesar_archivo(path):
 
-#     validate_inscritos(df)
+    nombre = os.path.basename(path)
+    anio = int(path.split(os.sep)[-2])
+    tipo = detectar_tipo_archivo(nombre)
 
-#     load_fact_inscritos(engine, df)
+    print(f"\n📂 Procesando {nombre} - Año {anio} - Tipo {tipo}")
 
-#     register_year(engine, "fact_inscritos", anio)
+    if check_year_loaded(engine, f"fact_snies_{tipo}", anio):
+        print(f"⚠️ {tipo} {anio} ya cargado")
+        return
 
-#     print(f"Año {anio} cargado correctamente.")
-
-#Carga de dimension tiempo
-def load_dim_tiempos(path):
     df = extract_excel(path)
-    load_dim_tiempo(engine,df)
+    df = transformar_snies(df)
+    load_dim_programa_oferta(engine, df)  
+
+    validate_inscritos(df)
+
+    load_fact_inscritos(engine, df)
+
+    register_year(engine, f"fact_snies_{tipo}", anio)
+
+    print(f"✅ {tipo} {anio} cargado correctamente")
 
 
-#Carga de dimension sexo
-def load_dim_sexo(path):
-    df = extract_excel(path)
-    load_dim_sexos(engine,df)
+def procesar_carpeta(ruta):
 
-#Carga de dimension instituciones
-#Carga de dimension sexo
-def load_dim_instituciones(path):
-    df = extract_excel(path)
-    load_dim_institucion(engine,df)
-
-#Carga de departamentos
-
-def load_dim_departametoss(path):
-    df = extract_excel(path)
-    load_dim_departamentos(engine,df)
-
-# Carga de municipios 
-def load_dim_municipioss(path):
-    df = extract_excel(path)
-    load_dim_municipios(engine,df)
-
+    for root, dirs, files in os.walk(ruta):
+        for archivo in files:
+            if archivo.endswith((".xlsx", ".xlsb")):
+                path = os.path.join(root, archivo)
+                procesar_archivo(path)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--file", required=True)
-    #parser.add_argument("--year", required=True, type=int)
-
-    args = parser.parse_args()
-
-    # run_snies(args.file, args.year)
-    #run_inscritos(args.file, args.year)
-    
-    #load_dim_tiempos(args.file)
-   # load_dim_sexo(args.file)
-    load_dim_instituciones(args.file)
-   # load_dim_municipioss(args.file)
-   # load_dim_departametoss(args.file)
-
-
+    ruta = "data/snies"
+    procesar_carpeta(ruta)
