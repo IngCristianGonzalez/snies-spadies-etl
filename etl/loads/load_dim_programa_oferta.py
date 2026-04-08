@@ -23,11 +23,11 @@ def load_dim_programa_oferta(engine, df):
     # 🔥 NORMALIZAR TIPOS Y FORMATO
     df["codigo_snies_del_programa"] = df["codigo_snies_del_programa"].astype(str).str.strip()
     df["codigo_de_la_institucion"] = df["codigo_de_la_institucion"].astype(str).str.strip()
-    df["codigo_del_municipio_programa"] = df["codigo_del_municipio_programa"].astype(str).str.zfill(5)
 
     dim_programa["codigo_snies_del_programa"] = dim_programa["codigo_snies_del_programa"].astype(str).str.strip()
     dim_institucion["codigo_ies"] = dim_institucion["codigo_ies"].astype(str).str.strip()
-    dim_municipio["codigo_municipio"] = dim_municipio["codigo_municipio"].astype(str).str.zfill(5)
+
+
 
     # 🔥 merges
     df = df.merge(dim_programa, left_on="codigo_snies_del_programa", right_on="codigo_snies_del_programa")
@@ -36,13 +36,16 @@ def load_dim_programa_oferta(engine, df):
     df = df.merge(dim_institucion, left_on="codigo_de_la_institucion", right_on="codigo_ies")
     df = df.rename(columns={"id": "institucion_id"})
 
-    df = df.merge(dim_municipio, left_on="codigo_del_municipio_programa", right_on="codigo_municipio")
-   # df = df.rename(columns={"id": "municipio_id"})
+
+    df = df.merge(dim_municipio,
+              left_on="codigo_del_municipio_programa",
+              right_on="codigo_municipio")
+    df = df.rename(columns={"id": "municipio_id"})
 
     df_final = df[[
         "programa_id",
         "institucion_id",
-       # "municipio_id"
+        "municipio_id"
     ]].drop_duplicates()
 
     print("📊 combinaciones únicas:", len(df_final))

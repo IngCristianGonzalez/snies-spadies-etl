@@ -26,7 +26,7 @@ def load_fact_inscritos(engine, df):
     # )
 
     dim_programa_oferta = pd.read_sql("""
-        SELECT id, programa_id, institucion_id
+        SELECT id, programa_id, institucion_id, municipio_id
         FROM tb_dim_programa_oferta
     """, engine)
 
@@ -37,6 +37,9 @@ def load_fact_inscritos(engine, df):
 
     # ---- MERGES LIMPIOS ----
 
+
+    print("COLUMNAS DF:")
+    print(df.columns.tolist())
     df = df.merge(dim_programa,
                   left_on="codigo_snies_del_programa",
                   right_on="codigo_snies_del_programa")
@@ -49,15 +52,33 @@ def load_fact_inscritos(engine, df):
 
     df = df.rename(columns={"id": "institucion_id"})
 
+
+    # Diagnóstico rápido - pégalo antes del merge de municipio
+
+    print("=== CÓDIGOS EN EL DF ===")
+    print(df["codigo_del_municipio_programa"].dropna().unique()[:10])
+
+    print("\n=== CÓDIGOS EN dim_municipio ===")
+    print(dim_municipio["codigo_municipio"].dropna().unique()[:10])
+
+    print("\n=== TIPOS ===")
+    print("df:", df["codigo_del_municipio_programa"].dtype)
+    print("dim:", dim_municipio["codigo_municipio"].dtype)
+
+    print("\n=== INTERSECCIÓN ===")
+    comunes = set(df["codigo_del_municipio_programa"]) & set(dim_municipio["codigo_municipio"])
+    print(f"Municipios que hacen match: {len(comunes)}")
+    print("Ejemplos que NO hacen match:", 
+        set(df["codigo_del_municipio_programa"]) - set(dim_municipio["codigo_municipio"]))
     df = df.merge(dim_municipio,
-                  left_on="codigo_del_municipio_programa",
-                  right_on="codigo_municipio")
+              left_on="codigo_del_municipio_programa",
+              right_on="codigo_municipio")
 
     df = df.rename(columns={"id": "municipio_id"})
 
 
     df = df.merge(dim_programa_oferta,
-                  on=["programa_id", "institucion_id"])
+              on=["programa_id", "institucion_id", "municipio_id"])
 
     df = df.rename(columns={"id": "programa_oferta_id"})
 

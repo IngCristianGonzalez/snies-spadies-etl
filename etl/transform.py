@@ -56,29 +56,28 @@ def filter_instituciones(df, codigos=["1120", "1123"]):
 
 # 🔹 Mapear columnas dinámicamente
 def mapear_columnas(df):
-
     columnas = {}
 
     for col in df.columns:
         c = col.lower().replace("\n", " ").strip()
 
-        # institución
-        if "institucion" in c and "codigo" in c:
+        # institución → "Código de la Institución"
+        if "codigo" in c and "institucion" in c:
             columnas["codigo_de_la_institucion"] = col
 
-        # programa snies
-        elif "snies" in c and "programa" in c:
+        # programa snies → "Código SNIES del programa"
+        elif "codigo" in c and "snies" in c and "programa" in c:
             columnas["codigo_snies_del_programa"] = col
 
-        # municipio programa
-        elif "municipio" in c and "programa" in c:
+        # municipio del programa → "Código del Municipio (Programa)"  ← el numérico
+        elif "codigo" in c and "municipio" in c and "programa" in c:
             columnas["codigo_del_municipio_programa"] = col
 
-        # 🔥 ID GENERO (modelo estrella)
-        elif "id genero" in c or "id_genero" in c:
+        # id género
+        elif "id genero" in c or "id_genero" in c or "id género" in c:
             columnas["id_genero"] = col
 
-        # fallback por si no viene ID
+        # fallback género sin id
         elif "genero" in c and "id" not in c:
             columnas["genero"] = col
 
@@ -147,7 +146,12 @@ def transformar_snies(df):
     # 5. tipos de datos
     df["codigo_de_la_institucion"] = df["codigo_de_la_institucion"].astype(str).str.strip()
     df["codigo_snies_del_programa"] = df["codigo_snies_del_programa"].astype(str).str.strip()
-    df["codigo_del_municipio_programa"] = df["codigo_del_municipio_programa"].astype(str).str.strip()
+    df["codigo_del_municipio_programa"] = (
+    df["codigo_del_municipio_programa"]
+    .astype(str)
+    .str.strip()
+    .str.zfill(5)          # ← AGREGAR ESTO
+)
 
     df["anio"] = df["anio"].astype(int)
     df["semestre"] = df["semestre"].astype(int)

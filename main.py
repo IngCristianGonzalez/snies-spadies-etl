@@ -33,6 +33,15 @@ def procesar_archivo(path):
 
     df = extract_excel(path)
     df = transformar_snies(df)
+    print("=== POST TRANSFORM ===")
+    print(df[["codigo_snies_del_programa", "codigo_de_la_institucion", "codigo_del_municipio_programa"]].head(3))
+    print("tipos:", df[["codigo_snies_del_programa", "codigo_de_la_institucion", "codigo_del_municipio_programa"]].dtypes)
+    print(df["codigo_del_municipio_programa"].unique())
+    # Y esto para ver qué hay en la dimensión
+    import pandas as pd
+    dim_prog = pd.read_sql("SELECT codigo_snies_del_programa FROM tb_dim_programa LIMIT 5", engine)
+    print("\n=== DIM PROGRAMA ===")
+    print(dim_prog)
     load_dim_programa_oferta(engine, df)  
 
     validate_inscritos(df)
