@@ -34,7 +34,8 @@ def extract_excel(path):
     # 🔹 leer archivo correctamente
     df = pd.read_excel(path, engine=engine_used, header=header_row)
 
-    return df
+    return df  
+
 
 def extract_csv(path):
     print(f"Extrayendo archivo: {path}")
