@@ -10,17 +10,13 @@ def limpiar_nombre_variable(nombre_archivo):
 
 
 def transformar_spadies(df, nombre_archivo):
-
-    # 🔹 Limpiar BOM / encoding raro
+    # Limpiar BOM / encoding raro
     df.columns = df.columns.str.replace('ï»¿', '')
-
-    # 🔹 Detectar columna de categoría
+    # Detectar columna de categoría
     col_categoria = df.columns[0]
-
-    # 🔹 Nombre de variable
+    # Nombre de variable
     variable = limpiar_nombre_variable(nombre_archivo)
-
-    # 🔹 UNPIVOT
+    #UNPIVOT
     df_long = df.melt(
         id_vars=[col_categoria],
         var_name="periodo",

@@ -1,5 +1,4 @@
 import os
-from turtle import pd
 from config.database import engine
 from etl.extract import extract_excel
 import pandas as pd

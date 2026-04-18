@@ -1,15 +1,24 @@
 import unicodedata
 import pandas as pd
-
-# 🔹 Normalizar nombres de columnas
+import re
+#Normalizar nombres de columnas
 def normalize_column_name(col):
     col = col.replace("\n", " ")
     col = col.strip().lower()
     col = unicodedata.normalize("NFKD", col)
     col = col.encode("ascii", "ignore").decode("utf-8")
-    col = col.replace(" ", "_")
+    col = re.sub(r"_+", "_", col.replace(" ", "_"))
     col = col.replace("(", "").replace(")", "")
     return col
+
+def limpiar_texto(texto):
+    texto = texto.lower()
+    texto = unicodedata.normalize("NFKD", texto)
+    texto = texto.encode("ascii", "ignore").decode("utf-8")
+    texto = texto.replace("_", " ").strip()
+    texto = re.sub(r"\d+", "", texto)  # 🔥 eliminar años
+    texto = texto.replace(" ", "")
+    return texto
 
 
 # 🔹 Limpieza general SNIES
@@ -18,83 +27,82 @@ def clean_snies(df):
     return df
 
 
-# 🔹 Detectar columna dinámica (valor)
-def detectar_columna_valor(df):
+# Detectar columna dinámica (valor)
+def detectar_columna_valor(df, tipo):
+
+    tipo = tipo.lower().strip()
+
     patrones = {
-        "inscritos": ["inscrit", "inscripcion", "inscripciones"],
-        "admitidos": ["admit", "admision", "admisiones"],
-        "matriculados": ["matricul", "matricula", "matriculas"]
+        "inscritos": ["inscrit","inscripciones", "inscrip"],
+        "admitidos": ["admit","admisiones", "admis"],
+        "matriculados": ["matricul"],
+        "graduados": ["graduad", "egres", "titul","Graduados"]
     }
 
+    keywords = patrones.get(tipo, [])
+
     for col in df.columns:
-        col_clean = col.lower().replace("_", "").replace(" ", "")
-        for tipo, keywords in patrones.items():
-            if any(k in col_clean for k in keywords):
-                return col, tipo
+        col_clean = limpiar_texto(col)  # 🔥 USA TU FUNCIÓN BUENA
 
-    print("⚠️ Columnas disponibles:", df.columns.tolist())
-    raise ValueError("No se encontró columna de valor")
+        if any(k in col_clean for k in keywords):
+            print(f"✅ Detectada columna '{col}' → '{col_clean}' para tipo '{tipo}'")
+            return col, tipo
+
+    print("❌ No match. Columnas limpias:")
+    for col in df.columns:
+        print("→", limpiar_texto(col))
+
+    raise ValueError(f"No se encontró columna para tipo {tipo}")
 
 
-
-# 🔹 Filtrar instituciones
+#Filtrar instituciones
 def filter_instituciones(df, codigos=["1120", "1123"]):
     df["codigo_de_la_institucion"] = df["codigo_de_la_institucion"].astype(str).str.strip()
     df = df[df["codigo_de_la_institucion"].isin(codigos)]
-    print("🏫 Instituciones:", df["codigo_de_la_institucion"].unique())
-    print("📊 Registros:", len(df))
+    print("Instituciones:", df["codigo_de_la_institucion"].unique())
+    print("Registros:", len(df))
     return df
 
 
-# 🔹 Mapear columnas dinámicamente
+#Mapear columnas dinámicamente
 def mapear_columnas(df):
     columnas = {}
-
     for col in df.columns:
         c = col.lower().replace("\n", " ").strip()
-
         # institución
         if "codigo" in c and "institucion" in c:
             columnas["codigo_de_la_institucion"] = col
-
         # programa snies
         elif "codigo" in c and "snies" in c and "programa" in c:
             columnas["codigo_snies_del_programa"] = col
-
         # municipio del programa
         elif "codigo" in c and "municipio" in c and "programa" in c:
             columnas["codigo_del_municipio_programa"] = col
-
         # id género (puede venir como id_sexo, id genero, etc.)
         elif any(x in c for x in ["idgenero", "id_genero", "id género", "idsexo", "id_sexo", "id sexo"]):
             columnas["id_genero"] = col
             # Normalizar valores: convertir a numérico, reemplazar texto y ceros por 3
             df[col] = pd.to_numeric(df[col], errors="coerce").fillna(3).astype(int)
             df[col] = df[col].replace(0, 3)
-
-
         # fallback género sin id
         elif "genero" in c and "id" not in c:
             columnas["genero"] = col
-
         # año
         elif "ano" in c or "año" in c:
             columnas["anio"] = col
-
         # semestre
         elif "semestre" in c:
             columnas["semestre"] = col
-
     return columnas
 
 
-# 🔥 TRANSFORMADOR FINAL
-def transformar_snies(df):
+#TRANSFORMADOR FINAL
+def transformar_snies(df,tipo):
     # 1. limpiar columnas
     df = clean_snies(df)
 
     # 2. detectar valor
-    col_valor, tipo = detectar_columna_valor(df)
+    col_valor, tipo = detectar_columna_valor(df,tipo)
     df = df.rename(columns={col_valor: "valor"})
     df["tipo"] = tipo
 

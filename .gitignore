@@ -1,2 +1,6 @@
 .env
 /data
+/config/__pycache__
+/etl/__pycache__
+/etl/loads/__pycache__
+/etl/validate/__pycache__
