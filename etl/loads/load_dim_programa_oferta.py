@@ -1,5 +1,12 @@
 import pandas as pd
 
+def limpiar_codigo(col):
+    return (
+        col.astype(str)
+        .str.replace('.0', '', regex=False)
+        .str.strip()
+    )
+
 def load_dim_programa_oferta(engine, df):
     """
     Carga todas las combinaciones únicas de programa + institución + municipio
@@ -20,14 +27,14 @@ def load_dim_programa_oferta(engine, df):
     )
 
     # 🔥 NORMALIZAR - CONSISTENCIA ES CLAVE
-    df["codigo_snies_del_programa"] = df["codigo_snies_del_programa"].astype(str).str.strip()
-    df["codigo_de_la_institucion"] = df["codigo_de_la_institucion"].astype(str).str.strip()
-    df["codigo_del_municipio_programa"] = df["codigo_del_municipio_programa"].astype(str).str.strip()  # SIN zfill aquí
-
-    dim_programa["codigo_snies_del_programa"] = dim_programa["codigo_snies_del_programa"].astype(str).str.strip()
-    dim_institucion["codigo_ies"] = dim_institucion["codigo_ies"].astype(str).str.strip()
-    dim_municipio["codigo_municipio"] = dim_municipio["codigo_municipio"].astype(str).str.strip()  # SIN zfill aquí
-
+    df["codigo_snies_del_programa"] = limpiar_codigo(df["codigo_snies_del_programa"])
+    df["codigo_de_la_institucion"] = limpiar_codigo(df["codigo_de_la_institucion"])
+    df["codigo_del_municipio_programa"] = limpiar_codigo(df["codigo_del_municipio_programa"])
+    df = df[df["codigo_del_municipio_programa"] != "000"]
+    dim_programa["codigo_snies_del_programa"] = limpiar_codigo(dim_programa["codigo_snies_del_programa"])
+    dim_institucion["codigo_ies"] = limpiar_codigo(dim_institucion["codigo_ies"])
+    dim_municipio["codigo_municipio"] = limpiar_codigo(dim_municipio["codigo_municipio"])  # SIN zfill aquí
+    
     print(f"\n📊 Antes de merges:")
     print(f"   df instituciones: {df['codigo_de_la_institucion'].unique()}")
     print(f"   dim_institucion: {dim_institucion['codigo_ies'].unique()}")
