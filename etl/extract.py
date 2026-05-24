@@ -26,7 +26,6 @@ def extract_excel(path):
             header_row = i
             break
 
-    # 🔥 fallback por si acaso
     if header_row is None:
         print("⚠️ No se detectó header, usando fila 2")
         header_row = 2

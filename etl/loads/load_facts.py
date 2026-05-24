@@ -148,7 +148,7 @@ def load_fact_snies(engine, df, tipo):
     print(f"✅ Merge tiempo: {df_antes} → {len(df_tipo)} registros")
     
     # Restaurar institucion_id (por seguridad)
-    df_tipo["institucion_id"] = df_tipo_institucion["institucion_id"].values
+    #df_tipo["institucion_id"] = df_tipo_institucion["institucion_id"].values
     
     # Filtrar solo registros con programa_oferta_id válido
     registros_sin_oferta = len(df_tipo[df_tipo["programa_oferta_id"].isna()])
