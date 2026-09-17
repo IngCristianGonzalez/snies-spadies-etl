@@ -1,14 +1,15 @@
 import os
+from pathlib import Path
+
 from config.database import engine
-from etl.extract import extract_excel
-import pandas as pd
+from etl.extract_dimensions import read_dim_tiempo
 from etl.loads.load_dim_departamentos import load_dim_departamentos
-from etl.loads.load_dim_municipios import load_dim_municipios
 from etl.loads.load_dim_institucion import load_dim_institucion
-from etl.loads.load_dim_sexo import load_dim_sexos
-from etl.loads.load_dim_tiempo import load_dim_tiempo
+from etl.loads.load_dim_municipios import load_dim_municipios
 from etl.loads.load_dim_programa import load_dim_programas
 from etl.loads.load_dim_programa_oferta import load_dim_programa_oferta
+from etl.loads.load_dim_sexo import load_dim_sexos
+from etl.loads.load_dim_tiempo import load_dim_tiempo
 
 
 def procesar_archivo(path):
@@ -17,8 +18,12 @@ def procesar_archivo(path):
 
     print(f"\n📂 Procesando dimensión: {nombre}")
 
-    import pandas as pd
-    df = pd.read_excel(path)   # 🔥 CAMBIO IMPORTANTE
+    if "tiempo" in nombre:
+        df = read_dim_tiempo(Path(path))
+    else:
+        import pandas as pd
+
+        df = pd.read_excel(path)
 
     print("🧾 Columnas:", df.columns.tolist())
 
@@ -46,7 +51,6 @@ def procesar_archivo(path):
 def procesar_carpeta(ruta):
 
     for archivo in os.listdir(ruta):
-
         # ignorar temporales de Excel
         if archivo.startswith("~$"):
             continue
@@ -57,7 +61,6 @@ def procesar_carpeta(ruta):
 
 
 if __name__ == "__main__":
-
     # ruta = "data/dimensions"   # 🔥 ajusta si tu carpeta es distinta
     # procesar_carpeta(ruta)
 
@@ -69,9 +72,16 @@ if __name__ == "__main__":
         "institucion": "dim_instituciones.xlsx",
         "sexo": "dim_sexo.xlsx",
         "tiempo": "dim_tiempo.xlsx",
-        "programa": "programas.xlsx"
+        "programa": "programas.xlsx",
     }
 
-    for key in ["departamento", "municipio", "institucion", "sexo", "tiempo","programa"]:
+    for key in [
+        "departamento",
+        "municipio",
+        "institucion",
+        "sexo",
+        "tiempo",
+        "programa",
+    ]:
         path = os.path.join(ruta, archivos[key])
         procesar_archivo(path)

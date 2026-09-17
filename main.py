@@ -69,7 +69,6 @@ def procesar_archivo(path):
 def procesar_carpeta(ruta):
 
     for root, dirs, files in os.walk(ruta):
-
         print(f"\n📂 Carpeta: {root}")
 
         for archivo in files:

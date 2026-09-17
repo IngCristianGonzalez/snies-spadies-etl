@@ -1,28 +1,31 @@
 import pandas as pd
 
+
 def load_dim_departamento(engine, df):
 
     print("🚀 Cargando dimensión departamento...")
 
-    df_dep = df[[
-        "codigo_del_departamento_programa",
-        "departamento_de_oferta_del_programa"
-    ]].drop_duplicates()
+    df_dep = df[
+        ["codigo_del_departamento_programa", "departamento_de_oferta_del_programa"]
+    ].drop_duplicates()
 
     # 🔹 renombrar
-    df_dep = df_dep.rename(columns={
-        "codigo_del_departamento_programa": "codigo_departamento",
-        "departamento_de_oferta_del_programa": "nombre"
-    })
+    df_dep = df_dep.rename(
+        columns={
+            "codigo_del_departamento_programa": "codigo_departamento",
+            "departamento_de_oferta_del_programa": "nombre",
+        }
+    )
 
     # 🔹 limpieza
-    df_dep["codigo_departamento"] = df_dep["codigo_departamento"].astype(str).str.strip()
+    df_dep["codigo_departamento"] = (
+        df_dep["codigo_departamento"].astype(str).str.strip()
+    )
     df_dep["nombre"] = df_dep["nombre"].astype(str).str.strip().str.upper()
 
     # ---- evitar duplicados ----
     existentes = pd.read_sql(
-        "SELECT codigo_departamento FROM tb_dim_departamento",
-        engine
+        "SELECT codigo_departamento FROM tb_dim_departamento", engine
     )
 
     df_dep = df_dep[
@@ -37,7 +40,7 @@ def load_dim_departamento(engine, df):
             engine,
             if_exists="append",
             index=False,
-            method="multi"
+            method="multi",
         )
         print("✅ Dimensión departamento cargada")
     else:

@@ -1,10 +1,7 @@
 import re
-import unicodedata
-
-from etl.transform_sexo import map_genero_codes
 
 
-#Normalizar nombres de columnas
+# Normalizar nombres de columnas
 def normalize_column_name(col):
     col = col.replace("\n", " ")
     col = col.strip().lower()
@@ -13,6 +10,7 @@ def normalize_column_name(col):
     col = re.sub(r"_+", "_", col.replace(" ", "_"))
     col = col.replace("(", "").replace(")", "")
     return col
+
 
 def limpiar_texto(texto):
     texto = texto.lower()
@@ -36,10 +34,10 @@ def detectar_columna_valor(df, tipo):
     tipo = tipo.lower().strip()
 
     patrones = {
-        "inscritos": ["inscrit","inscripciones", "inscrip"],
-        "admitidos": ["admit","admisiones", "admis"],
+        "inscritos": ["inscrit", "inscripciones", "inscrip"],
+        "admitidos": ["admit", "admisiones", "admis"],
         "matriculados": ["matricul"],
-        "graduados": ["graduad", "egres", "titul","Graduados"]
+        "graduados": ["graduad", "egres", "titul", "Graduados"],
     }
 
     keywords = patrones.get(tipo, [])
@@ -58,16 +56,18 @@ def detectar_columna_valor(df, tipo):
     raise ValueError(f"No se encontró columna para tipo {tipo}")
 
 
-#Filtrar instituciones
+# Filtrar instituciones
 def filter_instituciones(df, codigos=["1120", "1123"]):
-    df["codigo_de_la_institucion"] = df["codigo_de_la_institucion"].astype(str).str.strip()
+    df["codigo_de_la_institucion"] = (
+        df["codigo_de_la_institucion"].astype(str).str.strip()
+    )
     df = df[df["codigo_de_la_institucion"].isin(codigos)]
     print("Instituciones:", df["codigo_de_la_institucion"].unique())
     print("Registros:", len(df))
     return df
 
 
-#Mapear columnas dinámicamente
+# Mapear columnas dinámicamente
 def mapear_columnas(df):
     columnas = {}
     for col in df.columns:
@@ -82,7 +82,17 @@ def mapear_columnas(df):
         elif "codigo" in c and "municipio" in c and "programa" in c:
             columnas["codigo_del_municipio_programa"] = col
         # id género (puede venir como id_sexo, id genero, etc.)
-        elif any(x in c for x in ["idgenero", "id_genero", "id género", "idsexo", "id_sexo", "id sexo"]):
+        elif any(
+            x in c
+            for x in [
+                "idgenero",
+                "id_genero",
+                "id género",
+                "idsexo",
+                "id_sexo",
+                "id sexo",
+            ]
+        ):
             columnas["id_genero"] = col
             # Normalizar valores: nulo, 0 o inválido se mapea a SIN INFORMACION (9)
             df[col], _ = map_genero_codes(df[col])
@@ -98,13 +108,13 @@ def mapear_columnas(df):
     return columnas
 
 
-#TRANSFORMADOR FINAL
-def transformar_snies(df,tipo):
+# TRANSFORMADOR FINAL
+def transformar_snies(df, tipo):
     # 1. limpiar columnas
     df = clean_snies(df)
 
     # 2. detectar valor
-    col_valor, tipo = detectar_columna_valor(df,tipo)
+    col_valor, tipo = detectar_columna_valor(df, tipo)
     df = df.rename(columns={col_valor: "valor"})
     df["tipo"] = tipo
 
@@ -116,7 +126,7 @@ def transformar_snies(df,tipo):
         "codigo_snies_del_programa",
         "codigo_del_municipio_programa",
         "anio",
-        "semestre"
+        "semestre",
     ]
 
     if "id_genero" in mapeo:
@@ -136,7 +146,7 @@ def transformar_snies(df,tipo):
         mapeo["codigo_snies_del_programa"]: "codigo_snies_del_programa",
         mapeo["codigo_del_municipio_programa"]: "codigo_del_municipio_programa",
         mapeo["anio"]: "anio",
-        mapeo["semestre"]: "semestre"
+        mapeo["semestre"]: "semestre",
     }
 
     if "id_genero" in mapeo:
@@ -147,9 +157,15 @@ def transformar_snies(df,tipo):
     df = df.rename(columns=rename_dict)
 
     # 5. tipos de datos
-    df["codigo_de_la_institucion"] = df["codigo_de_la_institucion"].astype(str).str.strip()
-    df["codigo_snies_del_programa"] = df["codigo_snies_del_programa"].astype(str).str.strip()
-    df["codigo_del_municipio_programa"] = df["codigo_del_municipio_programa"].astype(str).str.strip().str.zfill(5)
+    df["codigo_de_la_institucion"] = (
+        df["codigo_de_la_institucion"].astype(str).str.strip()
+    )
+    df["codigo_snies_del_programa"] = (
+        df["codigo_snies_del_programa"].astype(str).str.strip()
+    )
+    df["codigo_del_municipio_programa"] = (
+        df["codigo_del_municipio_programa"].astype(str).str.strip().str.zfill(5)
+    )
     df = df.dropna(subset=["anio"])
     df["anio"] = df["anio"].astype(int)
     df["semestre"] = df["semestre"].astype(int)
@@ -171,7 +187,7 @@ def transformar_snies(df,tipo):
         "anio",
         "semestre",
         "tipo",
-        "valor"
+        "valor",
     ]
 
     if "id_genero" in df.columns:
