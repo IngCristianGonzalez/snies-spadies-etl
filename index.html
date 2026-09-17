@@ -244,7 +244,7 @@
        description: 'ETL Python para integrar SNIES y SPADIES en PostgreSQL.',
        project: 'snies-spadies-etl',
        features: [{
-         id: 14,
+         id: 1,
          name: 'contexto_cientifico_datos',
          title: 'Contexto cientifico de datos para el ETL',
          description: 'Configurar el contexto operativo del agente como cientifico de datos e ingeniero ETL.',
@@ -256,21 +256,45 @@
            'Verificacion con Python, Ruff y pytest configurada.',
            'AGENTS.md y el harness alineados con este repositorio.'
          ],
-         branch: 'feature/014_contexto_cientifico_datos',
-         status: 'in_progress',
+         branch: 'feature/001_contexto_cientifico_datos',
+          status: 'blocked',
          priority: 'alta',
          module: 'harness',
          type: 'configuration',
          sdd: false,
-         dependencies: []
-       }]
+          dependencies: []
+        }, {
+          id: 2,
+          name: 'lectura_dim_tiempo',
+          title: 'Lectura de dimension tiempo',
+          description: 'Definir y probar la lectura robusta de la dimension tiempo desde Excel.',
+          acceptance: [
+            'Lee data/dimensions/dim_tiempo.xlsx sin depender del nombre de la hoja.',
+            'Detecta una unica hoja con encabezados anio y semestre.',
+            'Devuelve un DataFrame con anio y semestre como enteros.',
+            'Omite y registra filas invalidas, vacias y duplicadas.',
+            'Falla con errores descriptivos ante archivos u hojas ambiguas.',
+            'No carga PostgreSQL ni mezcla lectura con persistencia.'
+          ],
+          branch: 'feature/002_lectura_dim_tiempo',
+          status: 'pending',
+          priority: 'alta',
+          module: 'etl',
+          type: 'feature',
+          sdd: true,
+          dependencies: []
+        }]
      };
      var data = {features: []};
     var currentSpec = {};
-    var historyData = {records: []};
-    var filtered = [];
-    var page = 1;
-    var perPage = 10;
+     var historyData = {records: []};
+     var filtered = [];
+     var page = 1;
+     var perPage = 10;
+
+     function formatFeatureId(id) {
+       return String(id).padStart(3, '0');
+     }
 
     var SL = {pending: 'Pendiente', in_progress: 'En Progreso', done: 'Completado', blocked: 'Bloqueado'};
      var TL = {feature: 'Feature', 'user-story': 'User Story', 'use-case': 'Use Case', configuration: 'Configuracion'};
@@ -382,7 +406,7 @@
       var tasks = currentSpec.tasks || [];
       document.getElementById('modal-title').textContent = currentSpec.feature.title || f.title || currentSpec.feature.name;
       document.getElementById('modal-body').innerHTML =
-        '<div class="modal-section"><h3>ID</h3><p>' + (currentSpec.feature.id || f.id || '-') + '</p></div>' +
+         '<div class="modal-section"><h3>ID</h3><p>' + formatFeatureId(currentSpec.feature.id || f.id || '-') + '</p></div>' +
         '<div class="modal-section"><h3>Nombre</h3><p>' + (currentSpec.feature.name || f.name || '-') + '</p></div>' +
         '<div class="modal-section"><h3>Tipo</h3><p>' + (TL[f.type] || f.type || '-') + '</p></div>' +
         '<div class="modal-section"><h3>Descripci\u00f3n</h3><p>' + (f.description || '-') + '</p></div>' +
@@ -446,7 +470,7 @@
       var acceptance = f ? f.acceptance || [] : [];
       var tasks = r ? r.tasks || [] : [];
       var docLinks = f ? f.documentation || [] : [];
-      var html = '<div class="modal-section"><h3>ID</h3><p>' + featureId + '</p></div>' +
+       var html = '<div class="modal-section"><h3>ID</h3><p>' + formatFeatureId(featureId) + '</p></div>' +
         '<div class="modal-section"><h3>Nombre</h3><p>' + name + '</p></div>' +
         '<div class="modal-section"><h3>Titulo</h3><p>' + title + '</p></div>' +
         (type ? '<div class="modal-section"><h3>Tipo</h3><p>' + (TL[type] || type) + '</p></div>' : '') +
@@ -569,7 +593,7 @@
           ? '<span class="badge ' + (r ? 'badge-ready' : 'badge-blocked-dep') + '">' + ds + ' ' + (r ? '✓' : '⏸') + '</span>'
           : '<span class="badge badge-ready">✓</span>';
         return '<tr data-id="' + f.id + '">' +
-          '<td>' + f.id + '</td>' +
+           '<td>' + formatFeatureId(f.id) + '</td>' +
           '<td><strong>' + f.title + '</strong><br><span style="color:#64748b;font-size:0.75rem">' + f.name + '</span></td>' +
           '<td><span class="badge badge-' + f.module + '">' + f.module + '</span></td>' +
           '<td><span class="badge badge-' + f.priority + '">' + f.priority + '</span></td>' +
@@ -630,15 +654,15 @@
           var depSpans = f.dependencies.map(function(d) {
             var x = data.features.find(function(y) { return y.id === d; });
             return x
-              ? '<span class="graph-dep ' + x.status + '">#' + d + '</span>'
-              : '<span class="graph-dep">#' + d + '?</span>';
+               ? '<span class="graph-dep ' + x.status + '">#' + formatFeatureId(d) + '</span>'
+               : '<span class="graph-dep">#' + formatFeatureId(d) + '?</span>';
           }).join('');
           depArrow = '<span class="dep-arrow">←</span><div class="graph-deps">' + depSpans + '</div>';
         } else {
           depArrow = '<span style="color:#237a4b;font-size:0.75rem;font-weight:500">✓ Sin dependencias</span>';
         }
         return '<div class="graph-row"' + rowStyle + '>' +
-          '<span class="graph-node graph-node-' + f.status + '">#' + f.id + ' ' + title + '</span>' +
+          '<span class="graph-node graph-node-' + f.status + '">#' + formatFeatureId(f.id) + ' ' + title + '</span>' +
           '<span class="badge badge-' + f.status + '" style="font-size:0.65rem">' + SL[f.status] + '</span>' +
           depArrow + '</div>';
       }).join('');
@@ -727,7 +751,7 @@
           node.style.left = (cx - nodeR) + 'px';
           node.style.top = (cy - nodeR) + 'px';
           node.dataset.id = f.id;
-          node.innerHTML = f.id;
+           node.innerHTML = formatFeatureId(f.id);
           node.addEventListener('dblclick', function() { showModal(f.id); });
           node.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -845,7 +869,7 @@
       var ch = getDepChain(f);
       document.getElementById('modal-title').textContent = f.title;
       document.getElementById('modal-body').innerHTML =
-        '<div class="modal-section"><h3>ID</h3><p>' + f.id + '</p></div>' +
+         '<div class="modal-section"><h3>ID</h3><p>' + formatFeatureId(f.id) + '</p></div>' +
         '<div class="modal-section"><h3>Nombre</h3><p>' + f.name + '</p></div>' +
         '<div class="modal-section"><h3>Tipo</h3><p>' + (TL[f.type] || f.type) + '</p></div>' +
         '<div class="modal-section"><h3>Descripci\u00f3n</h3><p>' + f.description + '</p></div>' +
@@ -862,7 +886,7 @@
               var x = data.features.find(function(y) { return y.id === d; });
               return x
                 ? '<div class="dep-item"><span class="badge badge-' + x.status + '" style="font-size:0.7rem">#' + x.id + '</span><span>' + x.title + '</span><span style="margin-left:auto;color:' + (x.status === 'done' ? '#237a4b' : '#b02a4e') + ';font-size:0.75rem">' + SL[x.status] + '</span></div>'
-                : '<div class="dep-item">#' + d + ' (no encontrada)</div>';
+                 : '<div class="dep-item">#' + formatFeatureId(d) + ' (no encontrada)</div>';
             }).join('')
           : '<p style="color:#237a4b">Sin dependencias - Puede empezar inmediatamente</p>') +
         (bl.length
@@ -1055,7 +1079,7 @@
           var fid = s.userData.featureId;
           var f = data.features.find(function(x) { return x.id === fid; });
           if (f) {
-            s.material.map = createTextTexture(String(f.id), t.labelColor, threeTheme === 'dark' ? 'rgba(15,23,42,0.7)' : 'rgba(255,255,255,0.8)');
+             s.material.map = createTextTexture(formatFeatureId(f.id), t.labelColor, threeTheme === 'dark' ? 'rgba(15,23,42,0.7)' : 'rgba(255,255,255,0.8)');
             s.material.map.needsUpdate = true;
             s.material.needsUpdate = true;
           }
@@ -1236,7 +1260,7 @@
         // Text label
         var labelBg = threeTheme === 'dark' ? 'rgba(15,23,42,0.7)' : 'rgba(255,255,255,0.8)';
         var labelColor = THEME[threeTheme].labelColor;
-        var labelTex = createTextTexture(String(f.id), labelColor, labelBg);
+         var labelTex = createTextTexture(formatFeatureId(f.id), labelColor, labelBg);
         var spriteMat = new THREE.SpriteMaterial({ map: labelTex, transparent: true, depthTest: false });
         var sprite = new THREE.Sprite(spriteMat);
         var labelScale = pos.r * 1.4;
