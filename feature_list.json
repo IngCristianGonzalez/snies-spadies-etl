@@ -1,0 +1,64 @@
+{
+  "description": "Inventario de trabajo del ETL Python para integrar SNIES y SPADIES en PostgreSQL.",
+  "features": [
+    {
+      "acceptance": [
+        "El contexto del proyecto está documentado para el rol de científico de datos.",
+        "La arquitectura define programación estructurada y POO limitada a responsabilidades justificadas.",
+        "Las convenciones de Python, pandas y SQL están documentadas.",
+        "Los contratos de calidad de datos SNIES/SPADIES están documentados.",
+        "La verificación del proyecto usa comandos Python, Ruff y pytest.",
+        "AGENTS.md y la configuración del harness no contienen referencias al proyecto anterior."
+      ],
+      "branch": "feature/014_contexto_cientifico_datos",
+      "completed_at": "",
+      "created_at": "2026-09-17",
+      "description": "Configurar el contexto operativo del agente para trabajar como científico de datos e ingeniero ETL.",
+      "executor": "Cristian Alarcon Gonzalez (cristianjussepalarcongonzalez@gmail.com)",
+      "id": 14,
+      "name": "contexto_cientifico_datos",
+      "note": "Documentación aprobada progresivamente; configuración del harness pendiente de verificación completa.",
+      "priority": "alta",
+      "sdd": false,
+      "spec_folder": "",
+      "status": "in_progress",
+      "title": "Contexto científico de datos para el ETL",
+      "module": "harness",
+      "type": "configuration",
+      "dependencies": []
+    }
+  ],
+  "metadata": {
+    "blocked_count": 0,
+    "done_count": 0,
+    "in_progress_count": 1,
+    "last_updated": "2026-09-17",
+    "note": "El código ETL existente se conserva; sus refactorizaciones se planifican como features independientes con tests.",
+    "pending_count": 0,
+    "total_features": 1,
+    "updated_by": "Cristian Alarcon Gonzalez (cristianjussepalarcongonzalez@gmail.com)"
+  },
+  "project": "snies-spadies-etl",
+  "rules": {
+    "deliverables_file": "ENGINES.md",
+    "executor_tracking_required": true,
+    "feature_branch_pattern": "feature/{NNN}_{name}",
+    "feature_id_format": "3-digit-zero-padded",
+    "main_branch": "main",
+    "never_merge_feature_to_main": true,
+    "one_feature_at_a_time": true,
+    "require_approved_spec_to_implement": true,
+    "require_tests_to_close": true,
+    "sdd_required_when": "feature has \"sdd\": true",
+    "spec_folder_pattern": "specs/{NNN}_{name}",
+    "update_deliverables_index_on_completion": true,
+    "valid_status": [
+      "pending",
+      "spec_ready",
+      "in_progress",
+      "done",
+      "blocked"
+    ]
+  },
+  "version": "3.0.0"
+}

@@ -1,0 +1,107 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "leader",
+  "instructions": ["AGENTS.md"],
+  "skills": {
+    "paths": [".opencode/skills"]
+  },
+  "agent": {
+    "leader": {
+      "description": "Orquestador del ETL Python. Valida contexto, crea ramas, coordina agentes y espera aprobaciones humanas.",
+      "model": "anthropic/claude-sonnet-4-6",
+      "mode": "primary",
+      "permission": {
+        "edit": "allow",
+        "bash": {
+          "git *": "allow",
+          "python3 *": "allow",
+          "ruff *": "allow",
+          "pytest *": "allow",
+          "bash init.sh*": "allow",
+          "*": "ask"
+        },
+        "task": "allow",
+        "question": "allow",
+        "read": "allow"
+      }
+    },
+    "spec-author": {
+      "description": "Redacta requirements.md, design.md y tasks.md para una feature. No toca código ni tests.",
+      "model": "anthropic/claude-sonnet-4-6",
+      "mode": "subagent",
+      "permission": {
+        "edit": {
+          "specs/**": "allow",
+          "*": "deny"
+        },
+        "read": "allow",
+        "bash": "deny"
+      }
+    },
+    "implementer": {
+      "description": "Ejecuta tasks aprobadas, escribe código Python y tests, y registra evidencia de calidad de datos.",
+      "model": "anthropic/claude-sonnet-4-6",
+      "mode": "subagent",
+      "permission": {
+        "edit": {
+          "src/**": "allow",
+          "etl/**": "allow",
+          "config/**": "allow",
+          "tests/**": "allow",
+          "progress/**": "allow",
+          "sql/**": "allow",
+          "main*.py": "allow",
+          "feature_list.json": "allow",
+          "*": "deny"
+        },
+        "read": "allow",
+        "bash": {
+          "python3 *": "allow",
+          "ruff *": "allow",
+          "pytest *": "allow",
+          "bash init.sh*": "allow",
+          "*": "ask"
+        }
+      }
+    },
+    "reviewer": {
+      "description": "Revisa implementación, contratos, calidad de datos, trazabilidad, tests y evidencia. No edita código.",
+      "model": "anthropic/claude-sonnet-4-6",
+      "mode": "subagent",
+      "permission": {
+        "edit": "deny",
+        "read": "allow",
+        "bash": {
+          "python3 *": "allow",
+          "ruff *": "allow",
+          "pytest *": "allow",
+          "bash init.sh*": "allow",
+          "git diff --check": "allow",
+          "*": "deny"
+        }
+      }
+    }
+  },
+  "command": {
+    "start-feature": {
+      "description": "Inicia el flujo SDD para la siguiente feature pendiente.",
+      "agent": "leader",
+      "template": "Ejecuta el flujo SDD completo. Lee feature_list.json, identifica la feature pendiente, prepara la rama, lanza spec-author, espera aprobación humana, luego implementer y reviewer. Sigue AGENTS.md y preserva el grano de los datos."
+    },
+    "spec": {
+      "description": "Lanza spec-author para crear requirements.md, design.md y tasks.md.",
+      "agent": "spec-author",
+      "template": "Ejecuta tu rol como spec-author. Lee la feature activa en feature_list.json, docs/project_context.md, docs/architecture.md, docs/conventions.md y docs/data_quality.md. Crea los tres archivos del spec en specs/{NNN}_{name}/."
+    },
+    "implement": {
+      "description": "Lanza implementer para ejecutar las tasks aprobadas.",
+      "agent": "implementer",
+      "template": "Ejecuta tu rol como implementer. Lee tasks.md de la feature activa, ejecuta cada task, escribe código y tests en las rutas autorizadas, corre la verificación Python aplicable y documenta R↔Tests en progress/impl_<name>.md."
+    },
+    "review": {
+      "description": "Lanza reviewer para verificar la implementación.",
+      "agent": "reviewer",
+      "template": "Ejecuta tu rol como reviewer. Lee el spec y la implementación, verifica contratos, grano, calidad de datos, trazabilidad R↔Tests, ejecuta compileall, Ruff, pytest y bash init.sh --full cuando el entorno lo permita. Documenta el resultado en progress/review_<name>.md y no edites código."
+    }
+  }
+}

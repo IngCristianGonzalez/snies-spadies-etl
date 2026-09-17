@@ -1,0 +1,67 @@
+{
+  "_readme": "Configuración del harness para el ETL SNIES/SPADIES.",
+  "_readme2": "Copiar como kickstart.json y completar los valores locales.",
+  "_readme3": "kickstart.json está ignorado por Git y no debe contener secretos.",
+  "_fieldGuide": {
+    "project.name": "Nombre del proyecto.",
+    "project.stack": "Stack tecnológico. Para este repositorio: python.",
+    "project.type": "Tipo de proyecto. Para este repositorio: data-etl.",
+    "runtime.tool": "Comando del runtime. Para este repositorio: python3.",
+    "runtime.minVersion": "Versión mínima de Python, actualmente 3.11.",
+    "verification.steps": "Pasos ordenados de compileall, Ruff y pytest.",
+    "repository.url": "URL remota opcional; vacía si no se usa.",
+    "team.executorName": "Nombre del ejecutor para progress/.",
+    "team.executorEmail": "Correo del ejecutor para progress/."
+  },
+  "project": {
+    "name": "snies-spadies-etl",
+    "stack": "python",
+    "type": "data-etl",
+    "version": "0.1.0"
+  },
+  "runtime": {
+    "tool": "python3",
+    "minVersion": "3.11"
+  },
+  "verification": {
+    "steps": [
+      {
+        "name": "compileall",
+        "workdir": ".",
+        "run": "python3 -m compileall -q ."
+      },
+      {
+        "name": "ruff-format",
+        "workdir": ".",
+        "run": "ruff format --check ."
+      },
+      {
+        "name": "ruff-lint",
+        "workdir": ".",
+        "run": "ruff check ."
+      },
+      {
+        "name": "unit-tests",
+        "workdir": ".",
+        "run": "python3 -m pytest tests/unit -q"
+      },
+      {
+        "name": "data-quality-tests",
+        "workdir": ".",
+        "run": "python3 -m pytest tests/data_quality -q"
+      },
+      {
+        "name": "integration-tests",
+        "workdir": ".",
+        "run": "python3 -m pytest tests/integration -q"
+      }
+    ]
+  },
+  "repository": {
+    "url": ""
+  },
+  "team": {
+    "executorName": "Tu Nombre",
+    "executorEmail": "tu@email.com"
+  }
+}
