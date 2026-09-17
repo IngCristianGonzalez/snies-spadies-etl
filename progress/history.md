@@ -8,6 +8,27 @@
 
 ---
 
+## 2026-09-17 — 015 Dimensión sexo (spec + implementación + cierre)
+
+- **Rama:** feature/015_dimension_sexo (base: main; commits 90fc655 spec_ready y
+  2bc0de9 implementación)
+- **Status:** done (SDD completo, spec aprobado por el humano)
+- **Ejecutado por:** Kerin Mindiola (kerinmindiola@gmail.com)
+- **Resumen:** Feature 015 con spec aprobado. Elicitación (7 decisiones): salida
+  solo DataFrame, categoría SIN INFORMACION (9) para id_genero nulo/0/inválido
+  (reemplaza la regla heredada → 3 TRANS), resolución en hechos y DDL
+  tb_dim_sexo fuera de alcance (documentado), duplicado con descripción distinta
+  aborta el lote, normalización UPPER+strip. Entregable: `etl/transform_sexo.py`
+  (funciones puras, sin DB) e integración de `map_genero_codes` en
+  `etl/transform.py`. 12 tests verdes; ruff limpio en archivos nuevos; deuda
+  previa (B006, formato global) documentada, no refactorizada.
+- **Evidencia:** `python -m compileall -q` OK; `python -m pytest tests/unit
+  tests/data_quality -q` → 12 passed; `git diff --check` OK; smoke
+  map_genero_codes [0,None,3,1,"x"] → [9,9,3,1,9]. Detalle en
+  `progress/impl_015_dimension_sexo.md` y `progress/review_015_dimension_sexo.md`.
+- **Pendiente:** integración a la rama base (a solicitud del humano); feature 014
+  sigue in_progress por decisión del humano.
+
 ## 2026-09-08 — Harness agnóstico (bootstrap)
 
 - **Rama:** feature/000_harness_agnostic (base: main, commit d012fac)
