@@ -1,6 +1,9 @@
-import unicodedata
-import pandas as pd
 import re
+import unicodedata
+
+from etl.transform_sexo import map_genero_codes
+
+
 #Normalizar nombres de columnas
 def normalize_column_name(col):
     col = col.replace("\n", " ")
@@ -81,9 +84,8 @@ def mapear_columnas(df):
         # id género (puede venir como id_sexo, id genero, etc.)
         elif any(x in c for x in ["idgenero", "id_genero", "id género", "idsexo", "id_sexo", "id sexo"]):
             columnas["id_genero"] = col
-            # Normalizar valores: convertir a numérico, reemplazar texto y ceros por 3
-            df[col] = pd.to_numeric(df[col], errors="coerce").fillna(3).astype(int)
-            df[col] = df[col].replace(0, 3)
+            # Normalizar valores: nulo, 0 o inválido se mapea a SIN INFORMACION (9)
+            df[col], _ = map_genero_codes(df[col])
         # fallback género sin id
         elif "genero" in c and "id" not in c:
             columnas["genero"] = col
