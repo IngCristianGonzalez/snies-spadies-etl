@@ -1,5 +1,3 @@
-import unicodedata
-import pandas as pd
 import re
 
 
@@ -96,9 +94,8 @@ def mapear_columnas(df):
             ]
         ):
             columnas["id_genero"] = col
-            # Normalizar valores: convertir a numérico, reemplazar texto y ceros por 3
-            df[col] = pd.to_numeric(df[col], errors="coerce").fillna(3).astype(int)
-            df[col] = df[col].replace(0, 3)
+            # Normalizar valores: nulo, 0 o inválido se mapea a SIN INFORMACION (9)
+            df[col], _ = map_genero_codes(df[col])
         # fallback género sin id
         elif "genero" in c and "id" not in c:
             columnas["genero"] = col

@@ -16,6 +16,6 @@
 
 | # | Feature | Rama | Commit SHA | Fecha |
 | - | ------- | ---- | ---------- | ----- |
-| — | —       | —    | —          | —     |
+| 15 | Dimensión sexo | feature/015_dimension_sexo | 2bc0de9 | 2026-09-17 |
 
-> _Tabla vacía. El leader añade una fila al completar cada feature._
+> _Tabla actualizada el 2026-09-17. Pendiente de integración a la rama base a solicitud del humano._
