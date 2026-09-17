@@ -29,6 +29,40 @@
     },
     {
       "acceptance": [
+        "La dimensión sexo se transforma y carga de forma idempotente desde un contrato de entrada verificado.",
+        "Los hechos SNIES resuelven genero_id contra la dimensión sexo o se documenta la política aprobada.",
+        "La regla heredada que mapeaba nulo/0 a TRANS queda corregida con una categoría explícita de sin información.",
+        "La feature incluye requirements, design, tasks y trazabilidad R-tests aprobados."
+      ],
+      "branch": "feature/015_dimension_sexo",
+      "completed_at": "2026-09-17",
+      "created_at": "2026-09-17",
+      "description": "Formalizar la dimensión sexo con spec aprobado: contrato de entrada dim_sexo.xlsx, normalización, DDL, carga idempotente y corrección de la regla heredada de id_genero.",
+      "executor": "Kerin Mindiola (kerinmindiola@gmail.com)",
+      "id": 15,
+      "name": "dimension_sexo",
+      "note": "Implementación cerrada el 2026-09-17: transformación pura etl/transform_sexo.py que devuelve DataFrame canónico con SIN INFORMACION (9); id_genero nulo/0/inválido mapea a 9 en etl/transform.py. Persistencia, DDL tb_dim_sexo y resolución en hechos documentadas como futuro (fuera de alcance). 12 tests verdes.",
+      "priority": "alta",
+      "sdd": true,
+      "spec_folder": "specs/015_dimension_sexo",
+      "status": "done",
+      "title": "Dimensión sexo",
+      "module": "etl",
+      "type": "feature",
+      "dependencies": [
+        14
+      ]
+    }
+  ],
+  "metadata": {
+    "blocked_count": 0,
+    "done_count": 1,
+    "in_progress_count": 1,
+    "last_updated": "2026-09-17",
+    "note": "El código ETL existente se conserva; sus refactorizaciones se planifican como features independientes con tests.",
+    "pending_count": 0,
+    "total_features": 2,
+    "updated_by": "Kerin Mindiola (kerinmindiola@gmail.com)"
         "Lee data/dimensions/dim_tiempo.xlsx sin depender del nombre de la hoja.",
         "Detecta una única hoja con encabezados anio y semestre, descartando filas introductorias.",
         "Devuelve únicamente anio y semestre como enteros.",

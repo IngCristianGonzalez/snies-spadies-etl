@@ -4,6 +4,11 @@
 
 ## Estado
 
+- **Feature en curso:**
+- **Status:**
+- **Inicio de sesión:**
+- **Rama:**
+- **Ejecutado por:**
 - **Feature en curso:** 002 — Lectura de dimensión tiempo
 - **Status:** pending
 - **Inicio de sesión:** 2026-09-17
