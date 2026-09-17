@@ -4,10 +4,10 @@
 
 ## Estado
 
-- **Feature en curso:** 014 — Contexto de científico de datos
+- **Feature en curso:** 001 — Contexto de científico de datos
 - **Status:** in_progress
 - **Inicio de sesión:** 2026-09-17
-- **Rama:** feature/014_contexto_cientifico_datos
+- **Rama:** feature/001_contexto_cientifico_datos
 - **Ejecutado por:** Cristian Alarcon Gonzalez (cristianjussepalarcongonzalez@gmail.com)
 
 ## Plan (tasks de specs/{NNN}\_{name}/tasks.md)
