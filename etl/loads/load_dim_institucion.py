@@ -1,37 +1,40 @@
 import pandas as pd
 
+
 def load_dim_institucion(engine, df):
 
     print("🚀 Cargando dimensión institución...")
 
-    df_inst = df[[
-        "codigo_ies",
-        "nombre",
-        "sector",
-        "caracter",
-        "codigo_departamento",
-        "codigo_municipio"
-    ]].drop_duplicates()
+    df_inst = df[
+        [
+            "codigo_ies",
+            "nombre",
+            "sector",
+            "caracter",
+            "codigo_departamento",
+            "codigo_municipio",
+        ]
+    ].drop_duplicates()
 
     # 🔹 limpieza
     df_inst["codigo_ies"] = df_inst["codigo_ies"].astype(str).str.strip()
 
- # ---- traer dimensiones ----
+    # ---- traer dimensiones ----
     dim_dep = pd.read_sql(
-        "SELECT id, codigo_departamento FROM tb_dim_departamento",
-        engine
+        "SELECT id, codigo_departamento FROM tb_dim_departamento", engine
     )
 
-    dim_mun = pd.read_sql(
-        "SELECT id, codigo_municipio FROM tb_dim_municipio",
-        engine
-    )
+    dim_mun = pd.read_sql("SELECT id, codigo_municipio FROM tb_dim_municipio", engine)
 
     # 🔥 NORMALIZAR TIPOS (ESTO SOLUCIONA TODO)
-    df_inst["codigo_departamento"] = df_inst["codigo_departamento"].astype(str).str.strip()
+    df_inst["codigo_departamento"] = (
+        df_inst["codigo_departamento"].astype(str).str.strip()
+    )
     df_inst["codigo_municipio"] = df_inst["codigo_municipio"].astype(str).str.strip()
 
-    dim_dep["codigo_departamento"] = dim_dep["codigo_departamento"].astype(str).str.strip()
+    dim_dep["codigo_departamento"] = (
+        dim_dep["codigo_departamento"].astype(str).str.strip()
+    )
     dim_mun["codigo_municipio"] = dim_mun["codigo_municipio"].astype(str).str.strip()
 
     # 🔥 MERGES
@@ -48,23 +51,21 @@ def load_dim_institucion(engine, df):
         raise ValueError("Municipios no encontrados")
 
     # ---- seleccionar final ----
-    df_final = df_inst[[
-        "codigo_ies",
-        "nombre",
-        "sector",
-        "caracter",
-        "departamento_id",
-        "municipio_id"
-    ]]
+    df_final = df_inst[
+        [
+            "codigo_ies",
+            "nombre",
+            "sector",
+            "caracter",
+            "departamento_id",
+            "municipio_id",
+        ]
+    ]
 
     print("📊 Nuevas instituciones:", len(df_final))
 
     df_final.to_sql(
-        "tb_dim_institucion",
-        engine,
-        if_exists="append",
-        index=False,
-        method="multi"
+        "tb_dim_institucion", engine, if_exists="append", index=False, method="multi"
     )
 
     print("✅ Dimensión institución cargada")

@@ -1,11 +1,10 @@
 from sqlalchemy import text
 
+
 def load_spadies(engine, df):
 
     with engine.begin() as conn:
-
         for _, row in df.iterrows():
-
             # 🔹 variable
             result = conn.execute(
                 text("""
@@ -14,7 +13,7 @@ def load_spadies(engine, df):
                     ON CONFLICT (nombre) DO UPDATE SET nombre=EXCLUDED.nombre
                     RETURNING id
                 """),
-                {"nombre": row["variable"]}
+                {"nombre": row["variable"]},
             )
             variable_id = result.fetchone()[0]
 
@@ -26,10 +25,7 @@ def load_spadies(engine, df):
                     ON CONFLICT DO NOTHING
                     RETURNING id
                 """),
-                {
-                    "variable_id": variable_id,
-                    "valor": row["categoria"]
-                }
+                {"variable_id": variable_id, "valor": row["categoria"]},
             )
 
             categoria_row = result.fetchone()
@@ -42,10 +38,7 @@ def load_spadies(engine, df):
                         SELECT id FROM tb_dim_categoria_spadies
                         WHERE variable_id = :variable_id AND valor = :valor
                     """),
-                    {
-                        "variable_id": variable_id,
-                        "valor": row["categoria"]
-                    }
+                    {"variable_id": variable_id, "valor": row["categoria"]},
                 ).fetchone()[0]
 
             # 🔹 tiempo
@@ -54,10 +47,7 @@ def load_spadies(engine, df):
                     SELECT id FROM tb_dim_tiempo
                     WHERE anio = :anio AND semestre = :semestre
                 """),
-                {
-                    "anio": row["anio"],
-                    "semestre": row["semestre"]
-                }
+                {"anio": row["anio"], "semestre": row["semestre"]},
             ).fetchone()
 
             if not tiempo:
@@ -76,6 +66,6 @@ def load_spadies(engine, df):
                 {
                     "categoria_id": categoria_id,
                     "tiempo_id": tiempo_id,
-                    "porcentaje": row["porcentaje"]
-                }
+                    "porcentaje": row["porcentaje"],
+                },
             )

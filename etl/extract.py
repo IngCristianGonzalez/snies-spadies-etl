@@ -3,6 +3,7 @@ import pandas as pd
 # Funcion que extrae datos de un archivo Excel, soportando tanto .xlsx como .xlsb
 import pandas as pd
 
+
 def extract_excel(path):
 
     if path.endswith(".xlsx"):
@@ -33,7 +34,7 @@ def extract_excel(path):
     # 🔹 leer archivo correctamente
     df = pd.read_excel(path, engine=engine_used, header=header_row)
 
-    return df  
+    return df
 
 
 def extract_csv(path):

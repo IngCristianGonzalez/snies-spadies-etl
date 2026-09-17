@@ -10,3 +10,4 @@
 /etl/__pycache__
 /etl/loads/__pycache__
 /etl/validate/__pycache__
+__pycache__/

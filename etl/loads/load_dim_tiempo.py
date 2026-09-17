@@ -1,5 +1,6 @@
 import pandas as pd
 
+
 def load_dim_tiempo(engine, df):
 
     print("🚀 Cargando dimensión tiempo...")
@@ -11,16 +12,10 @@ def load_dim_tiempo(engine, df):
     df_tiempo["semestre"] = df_tiempo["semestre"].astype(int)
 
     # ---- evitar duplicados ----
-    existentes = pd.read_sql(
-        "SELECT anio, semestre FROM tb_dim_tiempo",
-        engine
-    )
+    existentes = pd.read_sql("SELECT anio, semestre FROM tb_dim_tiempo", engine)
 
     df_tiempo = df_tiempo.merge(
-        existentes,
-        on=["anio", "semestre"],
-        how="left",
-        indicator=True
+        existentes, on=["anio", "semestre"], how="left", indicator=True
     )
 
     df_tiempo = df_tiempo[df_tiempo["_merge"] == "left_only"].drop(columns=["_merge"])
@@ -29,11 +24,7 @@ def load_dim_tiempo(engine, df):
 
     if len(df_tiempo) > 0:
         df_tiempo.to_sql(
-            "tb_dim_tiempo",
-            engine,
-            if_exists="append",
-            index=False,
-            method="multi"
+            "tb_dim_tiempo", engine, if_exists="append", index=False, method="multi"
         )
         print("✅ Dimensión tiempo cargada")
     else:

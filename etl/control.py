@@ -1,6 +1,7 @@
 from sqlalchemy import text
 import pandas as pd
 
+
 def check_year_loaded(engine, tabla, anio, tipo):
 
     query = text("""
@@ -13,16 +14,11 @@ def check_year_loaded(engine, tabla, anio, tipo):
     """)
 
     result = pd.read_sql(
-        query,
-        engine,
-        params={
-            "tabla": tabla,
-            "anio": anio,
-            "tipo": tipo
-        }
+        query, engine, params={"tabla": tabla, "anio": anio, "tipo": tipo}
     )
 
     return not result.empty
+
 
 def register_year(engine, tabla, anio, tipo):
 
@@ -32,8 +28,4 @@ def register_year(engine, tabla, anio, tipo):
     """)
 
     with engine.begin() as conn:
-        conn.execute(query, {
-            "tabla": tabla,
-            "anio": anio,
-            "tipo": tipo
-        })
+        conn.execute(query, {"tabla": tabla, "anio": anio, "tipo": tipo})
