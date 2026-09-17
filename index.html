@@ -257,13 +257,33 @@
            'AGENTS.md y el harness alineados con este repositorio.'
          ],
          branch: 'feature/001_contexto_cientifico_datos',
-         status: 'in_progress',
+          status: 'blocked',
          priority: 'alta',
          module: 'harness',
          type: 'configuration',
          sdd: false,
-         dependencies: []
-       }]
+          dependencies: []
+        }, {
+          id: 2,
+          name: 'lectura_dim_tiempo',
+          title: 'Lectura de dimension tiempo',
+          description: 'Definir y probar la lectura robusta de la dimension tiempo desde Excel.',
+          acceptance: [
+            'Lee data/dimensions/dim_tiempo.xlsx sin depender del nombre de la hoja.',
+            'Detecta una unica hoja con encabezados anio y semestre.',
+            'Devuelve un DataFrame con anio y semestre como enteros.',
+            'Omite y registra filas invalidas, vacias y duplicadas.',
+            'Falla con errores descriptivos ante archivos u hojas ambiguas.',
+            'No carga PostgreSQL ni mezcla lectura con persistencia.'
+          ],
+          branch: 'feature/002_lectura_dim_tiempo',
+          status: 'pending',
+          priority: 'alta',
+          module: 'etl',
+          type: 'feature',
+          sdd: true,
+          dependencies: []
+        }]
      };
      var data = {features: []};
     var currentSpec = {};
