@@ -26,6 +26,32 @@
       "module": "harness",
       "type": "configuration",
       "dependencies": []
+    },
+    {
+      "acceptance": [
+        "La dimensión sexo se transforma y carga de forma idempotente desde un contrato de entrada verificado.",
+        "Los hechos SNIES resuelven genero_id contra la dimensión sexo o se documenta la política aprobada.",
+        "La regla heredada que mapeaba nulo/0 a TRANS queda corregida con una categoría explícita de sin información.",
+        "La feature incluye requirements, design, tasks y trazabilidad R-tests aprobados."
+      ],
+      "branch": "feature/015_dimension_sexo",
+      "completed_at": "",
+      "created_at": "2026-09-17",
+      "description": "Formalizar la dimensión sexo con spec aprobado: contrato de entrada dim_sexo.xlsx, normalización, DDL, carga idempotente y corrección de la regla heredada de id_genero.",
+      "executor": "Kerin Mindiola (kerinmindiola@gmail.com)",
+      "id": 15,
+      "name": "dimension_sexo",
+      "note": "Spec aprobado en elicitación con el humano; documents listos para revisión (status spec_ready).",
+      "priority": "alta",
+      "sdd": true,
+      "spec_folder": "specs/015_dimension_sexo",
+      "status": "spec_ready",
+      "title": "Dimensión sexo",
+      "module": "etl",
+      "type": "feature",
+      "dependencies": [
+        14
+      ]
     }
   ],
   "metadata": {
@@ -34,9 +60,9 @@
     "in_progress_count": 1,
     "last_updated": "2026-09-17",
     "note": "El código ETL existente se conserva; sus refactorizaciones se planifican como features independientes con tests.",
-    "pending_count": 0,
-    "total_features": 1,
-    "updated_by": "Cristian Alarcon Gonzalez (cristianjussepalarcongonzalez@gmail.com)"
+    "pending_count": 1,
+    "total_features": 2,
+    "updated_by": "Kerin Mindiola (kerinmindiola@gmail.com)"
   },
   "project": "snies-spadies-etl",
   "rules": {
